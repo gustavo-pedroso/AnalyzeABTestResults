@@ -26,7 +26,7 @@
 # 
 # To get started, let's import our libraries.
 
-# In[1]:
+# In[84]:
 
 
 import pandas as pd
@@ -42,63 +42,64 @@ random.seed(42)
 # 
 # a. Read in the dataset and take a look at the top few rows here:
 
-# In[ ]:
+# In[85]:
 
 
-
+df = pd.read_csv('ab_data.csv')
 
 
 # b. Use the below cell to find the number of rows in the dataset.
 
-# In[ ]:
+# In[86]:
 
 
-
+len(df.index)
 
 
 # c. The number of unique users in the dataset.
 
-# In[ ]:
+# In[87]:
 
 
-
+df.user_id.nunique()
 
 
 # d. The proportion of users converted.
 
-# In[ ]:
+# In[88]:
 
 
-
+(len(df.query('converted == 1').index) / len(df.index)) * 100
 
 
 # e. The number of times the `new_page` and `treatment` don't line up.
 
-# In[ ]:
+# In[89]:
 
 
-
+len(df.query('not (group == "treatment" and landing_page == "new_page")').index)
 
 
 # f. Do any of the rows have missing values?
 
-# In[ ]:
+# In[90]:
 
 
-
+df.info()
 
 
 # `2.` For the rows where **treatment** is not aligned with **new_page** or **control** is not aligned with **old_page**, we cannot be sure if this row truly received the new or old page.  Use **Quiz 2** in the classroom to provide how we should handle these rows.  
 # 
 # a. Now use the answer to the quiz to create a new dataset that meets the specifications from the quiz.  Store your new dataframe in **df2**.
 
-# In[ ]:
+# In[91]:
 
 
+df2 = df.query('(group == "treatment" and landing_page == "new_page") or (group == "control" and landing_page == "old_page")')
+len(df2.index)
 
 
-
-# In[2]:
+# In[92]:
 
 
 # Double Check all of the correct rows were removed - this should be 0
@@ -109,73 +110,76 @@ df2[((df2['group'] == 'treatment') == (df2['landing_page'] == 'new_page')) == Fa
 
 # a. How many unique **user_id**s are in **df2**?
 
-# In[ ]:
+# In[93]:
 
 
-
+df2.user_id.nunique()
 
 
 # b. There is one **user_id** repeated in **df2**.  What is it?
 
-# In[ ]:
+# In[94]:
 
 
-
+df2[df2.user_id.duplicated()]
 
 
 # c. What is the row information for the repeat **user_id**? 
 
-# In[ ]:
+# In[95]:
 
 
-
+df2.query('user_id == 773192')
 
 
 # d. Remove **one** of the rows with a duplicate **user_id**, but keep your dataframe as **df2**.
 
-# In[ ]:
+# In[96]:
 
 
-
+df2 = df2.drop_duplicates(subset='user_id')
+df2.query('user_id == 773192')
 
 
 # `4.` Use **df2** in the below cells to answer the quiz questions related to **Quiz 4** in the classroom.
 # 
 # a. What is the probability of an individual converting regardless of the page they receive?
 
-# In[ ]:
+# In[97]:
 
 
-
+len(df2.query('converted == 1')) / len(df2.index)
 
 
 # b. Given that an individual was in the `control` group, what is the probability they converted?
 
-# In[ ]:
+# In[98]:
 
 
-
+df_temp = df2.query('group == "control"')
+len(df_temp.query('converted == 1')) / len(df_temp.index)
 
 
 # c. Given that an individual was in the `treatment` group, what is the probability they converted?
 
-# In[ ]:
+# In[99]:
 
 
-
+df_temp = df2.query('group == "treatment"')
+len(df_temp.query('converted == 1')) / len(df_temp.index)
 
 
 # d. What is the probability that an individual received the new page?
 
-# In[ ]:
+# In[100]:
 
 
-
+len(df2.query('landing_page == "new_page"')) / len(df2.index)
 
 
 # e. Consider your results from a. through d. above, and explain below whether you think there is sufficient evidence to say that the new treatment page leads to more conversions.
 
-# **Your answer goes here.**
+# R: with the information from a. through d. I would not be able to tell whether or not the new page is more efficient on converting users. A simple test that could be made is to check the probability of conversion when a user is presented with the new_page versus when they are presented with the old_page. But, even then, we would not be able to assure without proper testing.
 
 # <a id='ab_test'></a>
 # ### Part II - A/B Test
@@ -285,7 +289,7 @@ df2[((df2['group'] == 'treatment') == (df2['landing_page'] == 'new_page')) == Fa
 
 # l. We could also use a built-in to achieve similar results.  Though using the built-in might be easier to code, the above portions are a walkthrough of the ideas that are critical to correctly thinking about statistical significance. Fill in the below to calculate the number of conversions for each page, as well as the number of individuals who received each page. Let `n_old` and `n_new` refer the the number of rows associated with the old page and new pages, respectively.
 
-# In[ ]:
+# In[101]:
 
 
 import statsmodels.api as sm
